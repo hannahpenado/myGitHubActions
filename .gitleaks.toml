@@ -1,0 +1,83 @@
+# Gitleaks configuration for City of Flagstaff GIS repositories.
+# Extends the stock gitleaks ruleset (AWS, Azure, GitHub tokens, private keys,
+# generic API keys, and so on) with rules for ArcGIS credentials, which the
+# stock ruleset does not cover.
+# Tested against gitleaks 8.28.0.
+
+title = "City of Flagstaff GIS secret scanning"
+
+[extend]
+useDefault = true
+
+# Lines that pull a credential from a safe source are not findings.
+# Covers getpass prompts, environment variables, keyring, stored Pro profiles,
+# and GitHub Actions secret references.
+[allowlist]
+description = "Credentials read from a safe source"
+regexTarget = "line"
+regexes = [
+  '''getpass\(''',
+  '''os\.environ''',
+  '''os\.getenv''',
+  '''keyring\.''',
+  '''profile\s*=''',
+  '''\$\{\{\s*secrets\.''',
+]
+
+# ArcGIS Location Platform / ArcGIS Online API keys.
+# Legacy keys start with AAPK. API key credentials start with AAPT.
+[[rules]]
+id = "arcgis-api-key"
+description = "ArcGIS API key (AAPK or AAPT prefix)"
+regex = '''\b(AAP[KT][A-Za-z0-9_\-\.]{40,})'''
+keywords = ["aapk", "aapt"]
+
+# ArcGIS API for Python: GIS(url, username, "password") with a literal password.
+[[rules]]
+id = "arcgis-python-gis-password"
+description = "Literal password passed to arcgis.gis.GIS()"
+regex = '''GIS\(\s*["'][^"']+["']\s*,\s*["'][^"']+["']\s*,\s*["']([^"']{3,})["']'''
+keywords = ["gis("]
+
+# ArcGIS API for Python: GIS(..., password="...") keyword form.
+[[rules]]
+id = "arcgis-python-gis-password-kw"
+description = "Literal password keyword argument in arcgis.gis.GIS()"
+regex = '''GIS\([^)]*password\s*=\s*["']([^"']{3,})["']'''
+keywords = ["password"]
+
+# ArcPy: arcpy.SignInToPortal(url, username, "password").
+[[rules]]
+id = "arcpy-signintoportal-password"
+description = "Literal password passed to arcpy.SignInToPortal()"
+regex = '''SignInToPortal\(\s*[^,]+,\s*[^,]+,\s*["']([^"']{3,})["']'''
+keywords = ["signintoportal"]
+
+# Any literal password, pwd, or passwd assignment. The stock generic rule
+# requires high entropy, so it misses ordinary human passwords.
+[[rules]]
+id = "literal-password-assignment"
+description = "Literal password assigned in code or config"
+regex = '''(?i)\b(?:password|passwd|pwd|portal_pw|agol_pw)\s*[:=]\s*["']([^"'\s]{4,})["']'''
+keywords = ["password", "passwd", "pwd", "_pw"]
+
+# ArcGIS short-lived or long-lived token embedded in a REST URL or request.
+[[rules]]
+id = "arcgis-token-in-url"
+description = "ArcGIS token in a REST URL query string"
+regex = '''(?i)[?&]token=([A-Za-z0-9_\-\.]{30,})'''
+keywords = ["token="]
+
+# OAuth app client secret (Portal or ArcGIS Online registered app).
+[[rules]]
+id = "arcgis-client-secret"
+description = "OAuth client secret for a Portal or ArcGIS Online app"
+regex = '''(?i)client_?secret\s*[:=]\s*["']([A-Za-z0-9]{16,})["']'''
+keywords = ["client_secret", "clientsecret"]
+
+# Connection files store credentials. They should never be committed.
+# .sde = enterprise geodatabase, .ags = ArcGIS Server, .acs = ArcGIS Server (admin).
+[[rules]]
+id = "arcgis-connection-file"
+description = "ArcGIS connection file committed to the repo"
+path = '''(?i)\.(sde|ags|acs)$'''
