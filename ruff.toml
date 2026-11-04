@@ -1,0 +1,179 @@
+# Ruff lint configuration for City of Flagstaff GIS repositories.
+# Tuned for ArcPy scripts, script tools, Python toolboxes (.pyt), and
+# ArcGIS Notebooks (.ipynb). Place at the repo root next to .gitleaks.toml.
+
+# ArcGIS Pro 3.x runs Python 3.11.
+target-version = "py311"
+
+# GIS code has long workspace paths, SQL where clauses, and field lists.
+line-length = 120
+
+# Python toolboxes are plain Python with a .pyt extension. Ruff skips them
+# unless told to include them.
+extend-include = ["*.pyt"]
+
+# Folders that hold data or generated files, not source code.
+extend-exclude = [
+    "*.gdb",
+    "*.aprx",
+    "scratch",
+    "Index",
+    "ImportLog",
+    "GpMessages",
+    ".backups",
+]
+
+# Function and class names that "from arcpy.sa import *" and
+# "from arcpy.ia import *" provide (467 names, from ArcGIS Pro 3.6.2).
+# Ruff treats them as always defined, so they no longer trigger F405, while a
+# typo such as "totl" still does. When ArcGIS Pro adds tools, regenerate this
+# list from the ArcGIS Pro Python Command Prompt with:
+#     python -c "import arcpy.sa as s, arcpy.ia as i; print(sorted({n for m in (s, i) for n in m.__all__ if n[:1].isupper()}))"
+builtins = [
+    "ACos", "ACosH", "ASin", "ASinH", "ATan", "ATan2", "ATanH", "Abs", "AddSurfaceInformation",
+    "AdjustStreamToRaster", "Aggregate", "AggregateMultidimensionalRaster",
+    "AnalyzeChangesUsingCCDC", "AnalyzeChangesUsingLandTrendr", "Anomaly",
+    "ApparentReflectance", "Apply", "ApplyComplexDataFilter", "ApplyCoregistration",
+    "ApplyEnvironment", "ApplyGeometricTerrainCorrection", "ApplyOrbitCorrection",
+    "ApplyRadiometricCalibration", "ApplyRadiometricTerrainFlattening", "AreaSolarRadiation",
+    "ArgStatistics", "Arithmetic", "Aspect", "AspectSlope", "BAI", "BandArithmetic",
+    "BandCollectionStats", "Basin", "BitwiseAnd", "BitwiseLeftShift", "BitwiseNot", "BitwiseOr",
+    "BitwiseRightShift", "BitwiseXOr", "BlockStatistics", "BooleanAnd", "BooleanNot",
+    "BooleanOr", "BooleanXOr", "BoundaryClean", "Buffered", "CIg", "CIre",
+    "CalculateCutFillVolume", "CalculateKernelDensityRatio", "CellStatistics",
+    "ClassProbability", "Classify", "ClassifyObjectsUsingDeepLearning",
+    "ClassifyPixelsUsingDeepLearning", "ClassifyRaster", "ClassifyRasterUsingSpectra",
+    "ClayMinerals", "Clip", "Colormap", "ColormapToRGB", "ColorspaceConversion",
+    "CombinatorialAnd", "CombinatorialOr", "CombinatorialXOr", "Combine", "Complex",
+    "CompositeBand", "ComputeAccuracyForObjectDetection",
+    "ComputeAccuracyForPixelClassification", "ComputeChange", "ComputeChangeRaster",
+    "ComputeCoherence", "ComputeConfusionMatrix", "ComputeSARIndices",
+    "ComputeSegmentAttributes", "Con", "Contour", "ContourList", "ContourWithBarriers",
+    "ContrastBrightness", "ConvertSARUnits", "Convolution", "Corridor", "Cos", "CosH",
+    "CostAllocation", "CostBackLink", "CostConnectivity", "CostDistance", "CostPath",
+    "CostPathAsPolyline", "CreateAccuracyAssessmentPoints", "CreateBinaryMask",
+    "CreateColorComposite", "CreateConstantRaster", "CreateNormalRaster", "CreateRandomRaster",
+    "CreateSignatures", "Curvature", "CutFill", "DarcyFlow", "DarcyVelocity", "Deburst",
+    "DeepLearningModelToEcd", "Dendrogram", "DeriveContinuousFlow", "DeriveStreamAsLine",
+    "DeriveStreamAsRaster", "Despeckle", "DetectBrightOceanObjects",
+    "DetectChangeUsingChangeAnalysis", "DetectChangeUsingChangeAnalysisRaster",
+    "DetectChangeUsingDeepLearning", "DetectControlPoints", "DetectDarkOceanAreas",
+    "DetectImageAnomalies", "DetectObjectsUsingDeepLearning", "DetectObjectsUsingText",
+    "DetectTargetUsingSpectra", "Diff", "DimensionalMovingStatistics", "DistanceAccumulation",
+    "DistanceAllocation", "Divide", "DownloadOrbitFile", "EVI", "EditSignatures",
+    "ElevationVoidFill", "EqualTo", "EqualToFrequency", "EucAllocation", "EucBackDirection",
+    "EucDirection", "EucDistance", "Exp", "Exp10", "Exp2", "Expand",
+    "ExportTrainingDataForDeepLearning", "Extent", "ExtractBand", "ExtractByAttributes",
+    "ExtractByCircle", "ExtractByMask", "ExtractByPoints", "ExtractByPolygon",
+    "ExtractByRectangle", "ExtractFeaturesUsingAIModels", "ExtractMultiValuesToPoints",
+    "ExtractValuesToPoints", "ExtractVideoFramesToImages", "ExtractWater",
+    "FeaturePreservingSmoothing", "FeatureSolarRadiation", "FerrousMinerals", "Fill", "Filter",
+    "FindArgumentStatistics", "Float", "FloatDivide", "FloorDivide", "FlowAccumulation",
+    "FlowDirection", "FlowDistance", "FlowLength", "FocalFlow", "FocalStatistics", "Foreach",
+    "FuzzyGaussian", "FuzzyLarge", "FuzzyLinear", "FuzzyMSLarge", "FuzzyMSSmall",
+    "FuzzyMembership", "FuzzyNear", "FuzzyOverlay", "FuzzySmall", "GEMI", "GNDVI", "GVITM",
+    "GenerateInterferogram", "GenerateMaskedSARRaster", "GenerateMultidimensionalAnomaly",
+    "GenerateMultitemporalCoherence", "GenerateRadiometricTerrainCorrectedData",
+    "GenerateTrainingSamplesFromSeedPoints", "GenerateTrend", "GenerateTrendRaster",
+    "Geometric", "GeometricMedian", "GeomorphonLandforms", "Gradient", "Grayscale",
+    "GreaterThan", "GreaterThanEqual", "GreaterThanFrequency", "HeatIndex", "HfBinary",
+    "HfForward", "HfInverseLinear", "HfLinear", "HfTable", "HighestPosition", "Hillshade",
+    "Idw", "InList", "InspectTrainingSamples", "Int", "InterpolateFromSpatiotemporalPoints",
+    "InterpolateRasterByDimension", "InterpolateShape", "IronOxide", "IsNull", "IsoCluster",
+    "IsoClusterUnsupervisedClassification", "KernelDensity", "Kriging", "KrigingModelOrdinary",
+    "KrigingModelUniversal", "LabelBadBands", "LeastCostCorridor", "LessThan", "LessThanEqual",
+    "LessThanFrequency", "LineDensity", "LineStatistics", "LinearSpectralUnmixing",
+    "LinearUnmixing", "Ln", "LocateDepressions", "LocateRegions", "Log10", "Log2", "Lookup",
+    "LowestPosition", "MLClassify", "MNDWI", "MSAVI", "MTVI2", "Majority", "MajorityFilter",
+    "Mask", "Max", "Mean", "Median", "Mensuration", "Merge", "Min", "Minority", "Minus", "Mod",
+    "MultidimensionalPrincipalComponents", "MultidimensionalRasterCorrelation", "Multilook",
+    "MultiscaleSurfaceDeviation", "MultiscaleSurfaceDifference", "MultiscaleSurfacePercentile",
+    "NBR", "NDBI", "NDMI", "NDSI", "NDVI", "NDVIre", "NDWI", "NaturalNeighbor", "NbrAnnulus",
+    "NbrCircle", "NbrIrregular", "NbrRectangle", "NbrWedge", "NbrWeight", "Negate", "Nibble",
+    "NonMaximumSuppression", "NotEqual", "ObserverPoints", "OptimalCorridorConnections",
+    "OptimalInterpolation", "OptimalPathAsLine", "OptimalPathAsRaster",
+    "OptimalRegionConnections", "Over", "PVI", "Pansharpen", "ParticleTrack", "PathAllocation",
+    "PathBackLink", "PathDistance", "Percentile", "Pick", "PixelBlock", "PixelBlockCollection",
+    "Plus", "Point", "PointDensity", "PointStatistics", "PointsSolarRadiation", "Popularity",
+    "PorousPuff", "Power", "PredictUsingRegressionModel", "PredictUsingTrend",
+    "PredictUsingTrendRaster", "PrincipalComponents", "RTVICore", "RadarCalibration",
+    "RadiusFixed", "RadiusVariable", "Range", "Rank", "Raster", "RasterCalculator",
+    "RasterCellIterator", "RasterCollection", "RasterInfo", "RasterSolarRadiation",
+    "RasterToXarray", "RasterizeFeatures", "ReclassByASCIIFile", "ReclassByTable", "Reclassify",
+    "RegionGroup", "RegionGrow", "RegionPixelCount", "Remap", "RemapRange", "RemapValue",
+    "RemoveRasterSegmentTilingArtifacts", "RemoveThermalNoise", "Render", "Reproject",
+    "Resample", "ResampleLibrarySpectra", "RescaleByFunction", "RoundDown", "RoundUp",
+    "S1RadiometricCalibration", "S1ThermalNoiseRemoval", "SAVI", "SR", "SRre", "Sample",
+    "SegMeanShift", "SegmentMeanShift", "SetNull", "ShadedRelief", "Shrink", "Sin", "SinH",
+    "Sink", "Slice", "Slope", "SnapPourPoint", "SolarRadiationGraphics",
+    "SpaceTimeKernelDensity", "Speckle", "SpectralConversion", "Spline", "SplineWithBarriers",
+    "Square", "SquareRoot", "Statistics", "StatisticsHistogram", "StdDev", "StorageCapacity",
+    "StreamLink", "StreamOrder", "StreamToFeature", "Stretch", "Subset", "SubsetBands",
+    "Sultan", "Sum", "SummarizeCategoricalRaster", "SurfaceParameters", "TSAVI", "TabulateArea",
+    "Tan", "TanH", "TasseledCap", "Test", "TfExponential", "TfGaussian", "TfLarge", "TfLinear",
+    "TfLogarithm", "TfLogisticDecay", "TfLogisticGrowth", "TfMSLarge", "TfMSSmall", "TfNear",
+    "TfPower", "TfSmall", "TfSymmetricLinear", "Thin", "Threshold", "TimeMultipleDays",
+    "TimeSpecialDays", "TimeWholeYear", "TimeWithinDay", "Times", "TopoBoundary", "TopoCliff",
+    "TopoCoast", "TopoContour", "TopoExclusion", "TopoLake", "TopoPointElevation", "TopoSink",
+    "TopoStream", "TopoToRaster", "TopoToRasterByFile", "TopographicPositionIndex",
+    "TrainDeepLearningModel", "TrainIsoClusterClassifier", "TrainKNearestNeighborClassifier",
+    "TrainMaximumLikelihoodClassifier", "TrainRandomTreesClassifier",
+    "TrainRandomTreesRegressionModel", "TrainSupportVectorMachineClassifier",
+    "TrainUsingAutoDL", "TransformImageShapes", "TransposeBits", "Trend", "TrendToRGB",
+    "UnitConversion", "UnwrapPhase", "UpdateAccuracyAssessmentPoints", "VARI",
+    "ValuePercentileContours", "Variety", "VectorField", "VectorFieldRenderer",
+    "VfBidirHikingTime", "VfBinary", "VfCos", "VfCosSec", "VfHikingTime", "VfInverseLinear",
+    "VfLinear", "VfSec", "VfSecCos", "VfSymInverseLinear", "VfSymLinear", "VfTable",
+    "VideoMetadataToFeatureClass", "VideoMultiplexer", "Viewshed", "Viewshed2", "Visibility",
+    "VolumePercentileContours", "WOTable", "WSTable", "Watershed", "WeightedOverlay",
+    "WeightedSum", "WindChill", "XarrayToRaster", "ZonalCharacterization", "ZonalFill",
+    "ZonalGeometry", "ZonalGeometryAsTable", "ZonalHistogram", "ZonalRemap", "ZonalStatistics",
+    "ZonalStatisticsAsTable",
+]
+
+[lint]
+select = [
+    "E",    # pycodestyle errors
+    "W",    # pycodestyle warnings
+    "F",    # pyflakes: undefined names, unused imports and variables
+    "B",    # bugbear: likely bugs, such as mutable default arguments
+    "PLE",  # pylint errors
+    "SIM",  # simplifications
+]
+
+ignore = [
+    # Esri samples and most ArcPy code use "from arcpy.sa import *", so the
+    # wildcard import itself is allowed. F405 stays on: in a file with a
+    # wildcard import, a typo like "totl" is reported as F405, not as an
+    # undefined name, so ignoring F405 would hide real bugs. The arcpy.sa and
+    # arcpy.ia names are listed under "builtins" at the bottom of this file,
+    # so F405 fires only for names that are not ArcPy functions.
+    "F403",
+    # ArcPy scripts check out an extension before importing it:
+    #     arcpy.CheckOutExtension("Spatial")
+    #     from arcpy.sa import *
+    # E402 flags that second import as "not at top of file".
+    "E402",
+    # Long lines are reported by the formatter check instead.
+    "E501",
+    # Nested "with arcpy.da.*Cursor" blocks are often clearer than one
+    # combined with statement.
+    "SIM117",
+]
+
+[lint.per-file-ignores]
+# Python toolboxes must use Esri's method names and signatures
+# (getParameterInfo, updateParameters, execute(self, parameters, messages)).
+# These ignores matter only if you later add the N or ARG rule sets above.
+"*.pyt" = ["N802", "N803", "ARG002"]
+# Notebooks often import partway down, after markdown cells.
+"*.ipynb" = ["E402"]
+
+[lint.pyflakes]
+# Do not report "import arcpy" or "import arcgis" as unused. Some modules
+# import them only to confirm ArcGIS Pro is present or to check a license.
+allowed-unused-imports = ["arcpy", "arcgis"]
+
+[format]
+quote-style = "double"
+
